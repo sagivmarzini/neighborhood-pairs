@@ -467,9 +467,9 @@ function drawRound() {
 // ─── BUILD WA MESSAGE ────────────────────────────────────────────────────────
 function buildMessage(assignments) {
   const today = new Date().toLocaleDateString('he-IL', { day:'numeric', month:'numeric', year:'2-digit' });
-  let msg = `🗓 שיבוצי שכונות — ${today}\n\n`;
+  let msg = `🗓 שיבוצי שכונות - ${today}\n\n`;
   assignments.forEach(({ pair, hood }) => {
-    msg += `• ${pair[0]} & ${pair[1]} — ${HOODS[hood]}\n`;
+    msg += `• ${pair[0]} & ${pair[1]} - ${HOODS[hood]}\n`;
   });
   return msg.trim();
 }
