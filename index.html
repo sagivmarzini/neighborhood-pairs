@@ -44,13 +44,6 @@ header {
   position: relative;
   overflow: hidden;
 }
-header::before {
-  content: '';
-  position: absolute;
-  top: 8px; left: 0; right: 0;
-  font-size: 16px; opacity: 0.15;
-  letter-spacing: 8px; white-space: nowrap; overflow: hidden;
-}
 header::after {
   content: '';
   position: absolute;
@@ -69,7 +62,7 @@ header h1 {
 }
 
 /* ── CONTAINER ── */
-.container { max-width: 740px; margin: 0 auto; padding: 26px 20px 0; }
+.container { max-width: 600px; margin: 0 auto; padding: 26px 20px 0; }
 
 /* ── LEGEND ── */
 .legend {
@@ -84,9 +77,8 @@ header h1 {
   font-size: 13px; font-weight: 700; color: var(--text-mid);
 }
 .legend-swatch { width: 14px; height: 14px; border-radius: 50%; }
-.ls-0 { background: var(--green); }
+.ls-0 { background: var(--sky); }
 .ls-1 { background: var(--terracotta); }
-.ls-2 { background: var(--sky); }
 
 /* ── IMPORT SECTION ── */
 .import-box {
@@ -224,9 +216,9 @@ header h1 {
 
 /* ── PAIRS GRID ── */
 .pairs-grid {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px;
 }
-@media (max-width: 520px) { .pairs-grid { grid-template-columns: 1fr; } }
+@media (max-width: 420px) { .pairs-grid { grid-template-columns: 1fr; } }
 
 /* ── PAIR CARD ── */
 .pair-card {
@@ -241,20 +233,18 @@ header h1 {
   from { opacity: 0; transform: scale(0.93) translateY(8px); }
   to   { opacity: 1; transform: scale(1) translateY(0); }
 }
-.card-hood-0 { border-color: var(--green-pale); }
-.card-hood-0 .c-header { background: var(--green-dark); }
-.card-hood-0 .c-stripe { background: var(--green); }
-.card-hood-0 .c-names  { color: var(--green-dark); }
 
+/* Zone 0 = א׳2 = sky blue */
+.card-hood-0 { border-color: var(--sky-light); }
+.card-hood-0 .c-header { background: #1a4a60; }
+.card-hood-0 .c-stripe { background: var(--sky); }
+.card-hood-0 .c-names  { color: #0e3040; }
+
+/* Zone 1 = שאר היישוב = terracotta */
 .card-hood-1 { border-color: #f0d9b8; }
 .card-hood-1 .c-header { background: #6b3515; }
 .card-hood-1 .c-stripe { background: var(--terracotta); }
 .card-hood-1 .c-names  { color: #5a2e10; }
-
-.card-hood-2 { border-color: var(--sky-light); }
-.card-hood-2 .c-header { background: #1a4a60; }
-.card-hood-2 .c-stripe { background: var(--sky); }
-.card-hood-2 .c-names  { color: #0e3040; }
 
 .c-header {
   padding: 10px 14px 9px;
@@ -305,9 +295,8 @@ header h1 {
   display: flex; align-items: center; justify-content: center;
   color: #fff; font-family: 'Heebo', sans-serif;
 }
-.sd-0 { background: var(--green);       border-color: var(--green-dark); }
-.sd-1 { background: var(--terracotta);  border-color: #6b3515; }
-.sd-2 { background: var(--sky);         border-color: #1a4a60; }
+.sd-0 { background: var(--sky);        border-color: #1a4a60; }
+.sd-1 { background: var(--terracotta); border-color: #6b3515; }
 </style>
 </head>
 <body>
@@ -321,9 +310,8 @@ header h1 {
 
   <!-- LEGEND -->
   <div class="legend">
-    <div class="legend-item"><div class="legend-swatch ls-0"></div> א׳1 - א׳3</div>
-    <div class="legend-item"><div class="legend-swatch ls-1"></div> ב׳1 - ב׳2</div>
-    <div class="legend-item"><div class="legend-swatch ls-2"></div> א׳2</div>
+    <div class="legend-item"><div class="legend-swatch ls-0"></div> א׳2</div>
+    <div class="legend-item"><div class="legend-swatch ls-1"></div> שאר היישוב</div>
   </div>
 
   <!-- IMPORT PREVIOUS ROUND -->
@@ -361,31 +349,26 @@ header h1 {
 
 <script>
 // ─── DATA ────────────────────────────────────────────────────────────────────
-const PEOPLE = ['שגיב', 'רעי', 'צור', 'אלרואי', 'אורי', 'אבישי'];
-const HOODS  = ['א׳1 - א׳3', 'ב׳1 - ב׳2', 'א׳2'];
-const HOOD_SHORT = ['א', 'ב', 'ט']; // for stat dots
+const PEOPLE    = ['צור', 'אלרואי', 'אורי', 'אבישי'];
+const HOODS     = ['א׳2', 'שאר היישוב'];
+const HOOD_SHORT = ['א', 'ש'];
 
 // ─── STATE ───────────────────────────────────────────────────────────────────
 let roundNum = 1;
 let personHistory = {};
 PEOPLE.forEach(p => personHistory[p] = []);
-
-// last drawn assignments (array of {pair, hood}) for WhatsApp
 let lastAssignments = null;
 
 // ─── IMPORT PREVIOUS ROUND ──────────────────────────────────────────────────
-// Expected format lines: "• שם & שם — שכונה" or "שם & שם — שכונה"
 function importPrevious() {
   const text = document.getElementById('import-text').value.trim();
   const fb   = document.getElementById('import-feedback');
   if (!text) { fb.textContent = 'אין טקסט להטעין.'; fb.className = 'import-feedback err'; return; }
 
-  // Parse lines
   const lines = text.split('\n').map(l => l.replace(/^[•\-\*]\s*/, '').trim()).filter(Boolean);
   let loaded = 0;
 
   lines.forEach(line => {
-    // Match: "שם & שם — שכונה" or "שם & שם - שכונה"
     const m = line.match(/^(.+?)\s*[&+]\s*(.+?)\s*[—\-–]\s*(.+)$/);
     if (!m) return;
     const p1   = m[1].trim();
@@ -393,7 +376,6 @@ function importPrevious() {
     const hood = m[3].trim();
     const hi   = HOODS.findIndex(h => hood.includes(h) || h.includes(hood));
     if (hi === -1) return;
-    // Only apply if both people are in our list
     const i1 = PEOPLE.indexOf(p1);
     const i2 = PEOPLE.indexOf(p2);
     if (i1 === -1 || i2 === -1) return;
@@ -435,14 +417,14 @@ function shuffle(arr) {
 
 // ─── DRAW ────────────────────────────────────────────────────────────────────
 function drawRound() {
+  // 4 people → 2 pairs, 2 zones → only 2 possible assignments: [0,1] or [1,0]
   const shuffled = shuffle(PEOPLE);
   const pairs = [
     [shuffled[0], shuffled[1]],
     [shuffled[2], shuffled[3]],
-    [shuffled[4], shuffled[5]],
   ];
 
-  const perms  = [[0,1,2],[0,2,1],[1,0,2],[1,2,0],[2,0,1],[2,1,0]];
+  const perms = [[0, 1], [1, 0]];
   const scored = perms.map(perm => {
     let s = 0;
     pairs.forEach((pair, i) => {
@@ -455,7 +437,6 @@ function drawRound() {
   const chosen = tied[Math.floor(Math.random() * tied.length)].perm;
 
   const assignments = pairs.map((pair, i) => ({ pair, hood: chosen[i] }));
-
   assignments.forEach(({ pair, hood }) => pair.forEach(n => personHistory[n].push(hood)));
 
   lastAssignments = assignments;
@@ -482,8 +463,6 @@ function renderRound(num, assignments) {
 
   const block = document.createElement('div');
   block.className = 'round-block';
-
-  // Build grid id
   const gid = `pg-${num}-${Date.now()}`;
 
   block.innerHTML = `
@@ -509,7 +488,7 @@ function renderRound(num, assignments) {
   assignments.forEach(({ pair, hood }, idx) => {
     const card = document.createElement('div');
     card.className = `pair-card card-hood-${hood}`;
-    card.style.animationDelay = `${idx * 100}ms`;
+    card.style.animationDelay = `${idx * 120}ms`;
     card.innerHTML = `
       <div class="c-header">
         <span class="c-hood-name">${HOODS[hood]}</span>
@@ -523,14 +502,12 @@ function renderRound(num, assignments) {
     grid.appendChild(card);
   });
 
-  // store assignments on block element for WA buttons
   block._assignments = assignments;
   block._roundNum    = num;
 }
 
 // ─── WHATSAPP / COPY ─────────────────────────────────────────────────────────
 function getBlockAssignments(btn) {
-  // Walk up to round-block
   let el = btn;
   while (el && !el._assignments) el = el.parentElement;
   return el ? el._assignments : lastAssignments;
